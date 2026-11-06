@@ -1,0 +1,51 @@
+model rf {}: val Dice 0.705 (top-1 only)  [89s]
+model svm {'C': 1.0}: val Dice 0.691 (top-1 only)  [108s]
+model svm {'C': 10.0}: val Dice 0.711 (top-1 only)  [67s]
+  extra-region threshold None: val Dice 0.711
+  extra-region threshold 0.3: val Dice 0.709
+  extra-region threshold 0.4: val Dice 0.711
+  extra-region threshold 0.5: val Dice 0.711
+  extra-region threshold 0.6: val Dice 0.711
+  extra-region threshold 0.7: val Dice 0.710
+  extra-region threshold 0.8: val Dice 0.710
+  boundary snap: val Dice 0.705 vs 0.711 without -> not used
+chosen: {'kind': 'svm', 'params': {'C': 10.0}, 't_add': 0.4, 'refine': False}
+
+=== VAL RESULTS (full resolution 640x480) ===
+                                                 n  dice_mean      dice_ci  dice_median  iou_mean  pooled_iou  precision  recall  hit50  hit70
+variant                                                                                                                                       
+A edge/shape heuristic (no learning)           198      0.476  0.431-0.524        0.517     0.376       0.316      0.538   0.434  0.379  0.172
+B A + texture rule                             198      0.382  0.336-0.431        0.403     0.288       0.244      0.462   0.341  0.217  0.106
+C classifier on shape/edge only                198      0.662  0.632-0.690        0.722     0.531       0.493      0.580   0.768  0.616  0.278
+D classifier on texture only                   198      0.629  0.599-0.659        0.657     0.496       0.475      0.572   0.738  0.495  0.222
+E FULL: classifier on all features (1 region)  198      0.711  0.687-0.735        0.750     0.579       0.561      0.626   0.843  0.662  0.308
+E+ FULL (classifier, several potholes)         198      0.711  0.688-0.735        0.750     0.580       0.557      0.620   0.846  0.667  0.308
+oracle single (best one candidate)             198      0.821  0.805-0.835        0.844     0.709       0.722      0.822   0.856  0.924  0.616
+oracle multi (best candidate per pothole)      198      0.835  0.823-0.845        0.846     0.725       0.727      0.824   0.861  0.965  0.641
+random candidate (lower bound)                 198      0.117  0.091-0.144        0.001     0.079       0.112      0.344   0.142  0.051  0.010
+mean-mask baseline (fixed centred blob)        198      0.646  0.619-0.670        0.687     0.499       0.493      0.674   0.648  0.561  0.121
+SANITY: trained on shuffled labels             198      0.045  0.029-0.064        0.000     0.030       0.045      0.253   0.052  0.015  0.000
+
+candidate coverage (work res): best single candidate vs whole GT has IoU>=0.5 in 93% of images, >=0.7 in 62%, >=0.85 in 10%
+ground-truth potholes (240 in 198 images) that have a candidate with IoU>=0.5: 92%, >=0.7: 59%
+source of the best candidate (IoU>=0.5): {'ellipse': 115, 'otsu': 22, 'canny': 18, 'kmeans': 14, 'triangle': 9, 'adaptive': 6} <- sources that never win can be removed
+SANITY GT-as-candidate: the TRUE outline is accepted (probability>=0.5) in 85% of 60 images and scores within 0.1 of the best generated candidate in 80% (should be high; if low, the features cannot recognise even a perfect region)
+
+failure types (final pipeline): {'boundary_imprecise': 86, 'wrong_candidate_selected': 59, 'good': 46, 'candidate_generation_failed': 7}
+size errors: {'ok': 116, 'over': 71, 'under': 11} | images with several GT blobs: 17
+predicted/true area ratio, percentiles 10/50/90: 0.83 / 1.21 / 2.87; within +-25% of true area: 46%
+
+mean Dice by condition (terciles):
+               factor                           bin  n  A_heuristic  C_shape_edge  D_texture  E_full  oracle
+         pothole size               (0.0234, 0.157] 66        0.414         0.495      0.574   0.617   0.812
+         pothole size                 (0.157, 0.25] 66        0.593         0.743      0.637   0.727   0.837
+         pothole size                 (0.25, 0.588] 66        0.422         0.748      0.676   0.790   0.856
+     image brightness (108.36999999999999, 123.445] 66        0.484         0.686      0.642   0.711   0.839
+     image brightness            (123.445, 126.435] 66        0.518         0.677      0.656   0.742   0.848
+     image brightness            (126.435, 157.081] 66        0.426         0.623      0.590   0.681   0.818
+depth (cm below road)                (0.803, 2.271] 66        0.432         0.618      0.563   0.636   0.805
+depth (cm below road)                 (2.271, 3.71] 66        0.540         0.691      0.686   0.744   0.845
+depth (cm below road)                (3.71, 176.87] 66        0.458         0.678      0.639   0.754   0.854
+depth preview: on 129 images with reliable depth, depth-below-road from the PREDICTED mask vs the GT mask: Spearman 0.86, mean abs difference 0.41 cm
+
+[ok] overlays in C:\Users\PC\OneDrive\Desktop\ADIP\adip-project\outputs\overlays_val  (worst 16 + 8 random)

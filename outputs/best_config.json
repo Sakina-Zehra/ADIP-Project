@@ -1,0 +1,8 @@
+{
+ "kind": "svm",
+ "params": {
+  "C": 10.0
+ },
+ "t_add": 0.4,
+ "refine": false
+}
